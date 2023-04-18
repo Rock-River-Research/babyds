@@ -1,7 +1,7 @@
 # 🍼🔬 BabyDS
 An AI-powered data science pipeline
 
-<img src="https://github.com/Rock-River-Research/babyds/blob/main/babyds.png" width="200px" style="display: block; margin: 0 auto">
+<img src="https://github.com/Rock-River-Research/babyds/blob/main/babyds.png" width="300px" style="display: block; margin: 0 auto">
 
 -------
 
