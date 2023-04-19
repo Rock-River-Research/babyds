@@ -29,7 +29,7 @@ QUERY_FAILED = '<query_failed>'
 def query_database(db_path, query, max_rows=15):
 
     try:
-        with sqlite3.connect(path_to_db) as connection:
+        with sqlite3.connect(db_path) as connection:
             cursor = connection.cursor()
             cursor.execute(query)
             rows = cursor.fetchmany(max_rows)   # limit rows
@@ -45,7 +45,7 @@ def get_schema(db_path, table_name):
     
     command = f"PRAGMA table_info('{table_name}')"
     
-    with sqlite3.connect(path_to_db) as connection:
+    with sqlite3.connect(db_path) as connection:
         cursor = connection.cursor()
         cursor.execute(command)
         rows = [row[1:3] for row in cursor.fetchall()]
@@ -89,8 +89,10 @@ report_enhancer = LLMChain(
     prompt=enhance_analysis_prompt
 )
 
-def perform_analysis(objective, table_name, path_to_db, schema, n_queries, verbose=False):
+def perform_analysis(objective, table_name, path_to_db, n_queries, verbose=False):
     
+    schema = get_schema(path_to_db, table_name)
+
     # generate questions
     if verbose:
         print(f'{color.BOLD}Objective{color.END}: {objective}')
@@ -121,7 +123,7 @@ def perform_analysis(objective, table_name, path_to_db, schema, n_queries, verbo
         print(f'{total_completed}/{len(answers)} queries succeeded.')
     
     # generate report
-    if verbose:
+    if verbose: 
         print(f'📝 Generating report')
     data_for_report = [{'question': q, 'answer': a} for q, a in zip(questions, answers)]
     data_for_report = [x for x in data_for_report if str(x['answer']) != QUERY_FAILED]
@@ -141,16 +143,15 @@ if __name__ == '__main__':
     objective = 'We want to identify potential cases of employees being overpaid'
     table_name = 'salaries_sampled'
     path_to_db = Path.cwd() / 'nyc_salaries_sampled.db'
-    schema = get_schema(path_to_db, table_name)
     n_queries = 7
 
     full_report = perform_analysis(
         objective=objective,
         table_name=table_name,
         path_to_db=path_to_db,
-        schema=schema,
         n_queries=n_queries,
         verbose=True
     )
+
     print()
     print(full_report)
