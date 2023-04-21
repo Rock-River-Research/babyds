@@ -32,24 +32,56 @@ Below is a list of columns and their datatypes. Your query should only use the d
 If the question is not a question or is answerable with the given columns, respond to the best of your ability.
 Do not use columns that aren't in the table.
 Ensure that the query runs and returns the correct output.
-Be sure to filter out NULL where appropriate.
 
 # Query:
 '''
 )
 
+rearrange_prompt = PromptTemplate(
+    input_variables=['facts'],
+    template='''
+# Context
+Your job is to rearrange a list of facts into a narrative. 
+The rearranged list should have the same facts, but in an order that makes the narrative stronger.
+You don't have to use every fact
+
+# Task
+Rearrange the following list of facts to make the narrative stronger. It's ok to omit facts that don't fit neatly into the overall narrative.
+Be sure to start the response with a list of the ordered facts. Then include a short summary of the narrative.
+
+##### EXAMPLE ######
+Facts:
+1. Joe missed the bus this morning
+2. Joe woke up late
+3. Turtles are green
+4. Joe doesn't think he did well on his exam
+
+New order and narrative:
+[2, 1, 4] Joe got off to a bad start that day. Not only did he wake up late, he missed the bus. This likely caused him to perform poorly on his exam.
+####################
+
+# Facts:
+{facts}
+
+# New order and narrative::
+'''
+)
+
 
 generate_report_prompt = PromptTemplate(
-    input_variables=['data', 'objective'],
+    input_variables=['data', 'objective', 'narrative'],
     template='''
 # Context
 Your job is to present data using narrative and data storytelling. Below is a set of questions, answers, and methods.
 Present this data as a full data analysis. You should aim to aggregate it all into a cohesive narrative that effectively presents the findings.
-You don't have to use all of the findings. Arrange them in a way that best supports a strong narrative.
+Don't rearrange the datapoints, as they've already been arranged.
 The response should have a few major points that come together to paint a larger picture.
 
 # Here's the overall task
 {objective}
+
+# Here's the narrative we're aiming to communicate:
+{narrative}
 
 # Here's the data
 {data}
